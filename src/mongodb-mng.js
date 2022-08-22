@@ -1,4 +1,4 @@
-var Mongo = require('mongodb').MongoClient;
+const Mongo = require('mongodb').MongoClient;
 
 async function connect(host, port, user, password) {
   
@@ -150,4 +150,23 @@ async function joinCollection(callback, collection, join) {
   }
 }
 
-module.exports = {connect, createDatabase, isExistDatabase, useDatabase, closeDatabase, showDatabases, useCollection, showCollections, createCollection, deleteCollection, isExistCollection, insertDocument, insertDocuments, updateDocument, updateDocuments, selectDocuments, deleteDocuments, joinCollection};
+module.exports = {
+  connect, 
+  createDatabase, 
+  isExistDatabase, 
+  useDatabase, 
+  closeDatabase, 
+  showDatabases, 
+  useCollection, 
+  showCollections, 
+  createCollection, 
+  deleteCollection, 
+  isExistCollection, 
+  insertDocument, 
+  insertDocuments, 
+  updateDocument, 
+  updateDocuments, 
+  selectDocuments, 
+  deleteDocuments, 
+  joinCollection
+};

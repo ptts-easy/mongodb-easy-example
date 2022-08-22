@@ -8,8 +8,27 @@
  * @since   2022-08-19
  */
 
+const {
+  connect, 
+  createDatabase, 
+  isExistDatabase, 
+  useDatabase, 
+  closeDatabase, 
+  showDatabases, 
+  useCollection, 
+  showCollections, 
+  createCollection, 
+  deleteCollection, 
+  isExistCollection, 
+  insertDocument, 
+  insertDocuments, 
+  updateDocument, 
+  updateDocuments, 
+  selectDocuments, 
+  deleteDocuments, 
+  joinCollection
+} = require("./mongodb-mng");
 const {sleep} = require("./thread-mng");
-const {connect, createDatabase, isExistDatabase, useDatabase, closeDatabase, showDatabases, useCollection, showCollections, createCollection, deleteCollection, isExistCollection, insertDocument, insertDocuments, updateDocument, updateDocuments, selectDocuments, deleteDocuments, joinCollection} = require("./mongodb-mng");
 require("dotenv/config");
 
 async function mongodb_all_test() {
