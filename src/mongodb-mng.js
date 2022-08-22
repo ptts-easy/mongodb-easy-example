@@ -13,17 +13,17 @@ async function connect(host, port, user, password) {
   return client;
 }
 
-async function useDocument(conn, document) {
-  const db = conn.db(document);
+async function useDatabase(conn, document) {
+  const db = await conn.db(document);
   return db;
 }
 
-async function closeDocument(conn) {
+async function closeDatabase(conn) {
   
   await conn.close();
 }
 
-async function showDocuments(callback, host, port, user, password) {
+async function showDatabases(callback, host, port, user, password) {
   let url = `mongodb://${host}:${port}/`;
 
   await Mongo.connect(url, function(err, client) {
@@ -38,10 +38,14 @@ async function showDocuments(callback, host, port, user, password) {
   });
 }
 
-async function createDocument(conn, document) {
-  const db = conn.db(document);
+async function createDatabase(conn, document) {
+  const db = await conn.db(document);
 
-  db.createCollection("aaa");
+  await db.createCollection("aaa");
+}
+
+async function isExistDatabase(conn, document) {
+  return 1;
 }
 
 async function useCollection(db, collection) {
@@ -60,76 +64,90 @@ async function createCollection(db, collection) {
 }
 
 async function deleteCollection(db, collection) {
-  db.collection(collection).drop(function(err, delOK) {
+  await db.collection(collection).drop(function(err, delOK) {
     if (err) throw err;
     if (delOK) console.log("Collection deleted");
   });
 }
 
-async function insertRecord(collection, value) {
-  collection.insertOne(value, function(err, res) {
+async function isExistCollection(db, collection) {
+  return await db.collection(collection).count({}, { limit: 1 });
+}
+
+async function insertDocument(collection, value) {
+  await collection.insertOne(value, function(err, res) {
     if (err) throw err;
   });
 }
 
-async function insertRecords(collection, values) {
-  collection.insertMany(values, function(err, res) {
+async function insertDocuments(collection, values) {
+  await collection.insertMany(values, function(err, res) {
     if (err) throw err;
   });
 }
 
-async function updateRecords(collection, value, where = undefined) {
-  var myquery = { address: /^S/ };
-  var newvalues = {$set: {name: "Minnie"} };
-  collection.updateMany(myquery, newvalues, function(err, res) {
+async function updateDocument(collection, query, newvalue) {
+  await collection.updateOne(query, { $set: newvalue }, function(err, res) {
     if (err) throw err;
   });
 }
 
-async function selectRecords(callback, collection, field = undefined, where = undefined, sort = undefined, limit = undefined, offset = undefined) {
+async function updateDocuments(collection, query, newvalues) {
+  collection.updateMany(query, {$set: newvalues}, function(err, res) {
+    if (err) throw err;
+  });
+}
+
+async function selectDocuments(callback, collection, field = undefined, where = undefined, sort = undefined, offset = undefined, limit = undefined) {
   let res = undefined;
-console.log("0");
+
   if(field != undefined) {
     if (where != undefined) {
-      res = await collection.find(query, field);
-      console.log("1");
+      res = await collection.find(where, field);
     } else {
       res = await collection.find({}, field);
-      console.log("2");
     }
   } else {
     if (where != undefined) {
-      res = await collection.find(query);
-      console.log("3");
+      res = await collection.find(where);
     } else {
       res = await collection.find({});
-      console.log("4");
-      console.log(await res.toArray());
     }
-  }
-
-  if (limit != undefined) {
-    res = await res.limit(limit);
-    console.log("5");
   }
 
   if (sort != undefined) {
     res = await res.sort(sort);
-    console.log("6");
   }
-console.log("7");
-  await res.toArray(function(err, result) {
-    if (err) throw err;
-    callback(result);
-    console.log("8");
-  });
+
+  if (offset != undefined) {
+    res = await res.skip(offset);
+  }
+
+  if (limit != undefined) {
+    res = await res.limit(limit);
+  }
+
+  if (res != undefined) {
+    callback(await res.toArray());
+  }
 }
 
-async function deleteRecords(collection, query = undefined) {
+async function deleteDocuments(collection, query = undefined) {
   collection.deleteMany(query, function(err, obj) {
     if (err) throw err;
     console.log(" document(s) deleted");
   });
 }
 
-module.exports = {connect, createDocument, useDocument, closeDocument, showDocuments, useCollection, showCollections, createCollection, deleteCollection, insertRecord, insertRecords, updateRecords, selectRecords, deleteRecords};
+async function joinCollection(callback, collection, join) {
+
+  let res = await collection.aggregate([{ $lookup: join }]);
+  if (res != undefined) {
+    let documents = [];
+    res = await res.toArray();
+    res.forEach(order => documents.push(JSON.stringify(order)));
+    callback(documents);
+  }
+}
+
+module.exports = {connect, createDatabase, isExistDatabase, useDatabase, closeDatabase, showDatabases, useCollection, showCollections, createCollection, deleteCollection, isExistCollection, insertDocument, insertDocuments, updateDocument, updateDocuments, selectDocuments, deleteDocuments, joinCollection};
